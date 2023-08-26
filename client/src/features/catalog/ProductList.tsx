@@ -1,7 +1,10 @@
 import { List, ListItem, ListItemAvatar, Avatar, ListItemText, Button, Card, CardActions, CardContent, CardMedia, Typography, Grid, CardHeader } from '@mui/material'
-import React from 'react'
+import React, { useState } from 'react'
 import { Product } from '../../app/models/product'
 import { Link } from 'react-router-dom';
+import agent from '../../app/api/agent';
+import { LoadingButton } from '@mui/lab';
+import { useStoreContext } from '../../app/context/StoreContext';
 
 
 interface Props{
@@ -10,6 +13,17 @@ interface Props{
 }
 
 function ProductList({products}:Props) {
+const [loading,setLoading]=useState(false)
+const {setBasket}=useStoreContext()
+
+function handleAddItem(productId:number){
+  setLoading(true);
+  agent.Basket.addItem(productId)
+  .then(basket=>setBasket(basket))
+  .catch(error=>console.log(error))
+  .finally(()=>setLoading(false))
+}
+
   return (
     <>
           <Grid container spacing={4}>
@@ -37,7 +51,7 @@ function ProductList({products}:Props) {
                           </Typography>
                         </CardContent>
                         <CardActions>
-                          <Button size="small">Add to Cart</Button>
+                          <LoadingButton loading={loading} onClick={()=>handleAddItem(product.id)}>Add to Cart</LoadingButton>
                         <Button component={Link} to={`/catalog/${product.id}`} size="small">Views</Button>
                         </CardActions>
                       </Card>
